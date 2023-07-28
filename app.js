@@ -7,7 +7,6 @@ const ejs = require('ejs');
 const fileUpload = require('express-fileupload');
 const { v4: uuidv4 } = require('uuid');
 const port = 8000;
-
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
@@ -17,6 +16,7 @@ app.use(fileUpload());
 
 // Connectiong to Database
 const mysql = require('mysql2');
+const { genPassword, validPassword } = require('../utils/PasswordHasher');
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -44,8 +44,11 @@ app.post("/signup", (req, res) => {
     const email = req.body.email;
     const mobile = req.body.mobile;
     const password = req.body.password;
+    const util = genPassword(password);
+    const hash = util.hash,
+        salt = util.salt;
 
-    connection.query('INSERT INTO users (user_name, user_address, user_email, user_password, user_mobileno) VALUES (?, ?, ?, ?, ?)', [name, address, email, password, mobile], function(error, results, fields) {
+    connection.query('INSERT INTO users (user_name, user_address, user_email, user_password, user_mobileno , hash , salt) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, address, email, password, mobile, hash, salt], function(error, results, fields) {
         if (error) console.log(error);
         else res.render('signin');
     });
@@ -60,12 +63,12 @@ app.post("/signin", (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    connection.query('SELECT user_email, user_password FROM users WHERE user_email = ?', [email], function(error, results) {
+    connection.query('SELECT user_email, user_password , salt , hash FROM users WHERE user_email = ?', [email], function(error, results) {
         if (error) {
             //res.send("<h1> Invalid Email</h1>");
             res.render('signin');
         } else {
-            if (results[0].user_password === password) {
+            if (validPassword(results[0].user_password, results[0].hash, results[0].salt)) {
                 connection.query('SELECT user_id, user_name FROM users WHERE user_email = ?', [email], function(error, results) {
                     if (error) res.status(404);
                     else {

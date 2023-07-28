@@ -145,6 +145,8 @@ CREATE TABLE `users` (
   `user_email` varchar(45) NOT NULL,
   `user_password` varchar(1000) NOT NULL,
   `user_mobileno` varchar(45) NOT NULL,
+  `salt` varchar(1000) NOT NULL,
+  `hash` varchar(1000) NOT NULL,
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
