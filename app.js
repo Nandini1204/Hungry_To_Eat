@@ -16,7 +16,7 @@ app.use(fileUpload());
 
 // Connectiong to Database
 const mysql = require('mysql2');
-const { genPassword, validPassword } = require('../utils/PasswordHasher');
+const { genPassword, validPassword } = require('./utils/PasswordHasher');
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
